@@ -1,3 +1,9 @@
+## [0.2.4](https://github.com/mlmoravek/fetchservices/compare/v0.2.3...v0.2.4) (2026-05-21)
+
+### Bug Fixes
+
+* correct controller import order ([644eeec](https://github.com/mlmoravek/fetchservices/commit/644eeec3f97b56c2ed393ed555fb418a3ac1ca11))
+
 ## [0.2.3](https://github.com/mlmoravek/fetchservices/compare/v0.2.2...v0.2.3) (2026-05-19)
 
 ### Bug Fixes
