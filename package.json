@@ -20,6 +20,7 @@
     "url": "git+https://github.com/mlmoravek/fetchservices.git"
   },
   "files": [
+    "src",
     "dist",
     "CHANGELOG.md",
     "README.md",
