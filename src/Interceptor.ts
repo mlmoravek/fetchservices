@@ -1,11 +1,15 @@
-import { FetchHooks, ResponseType } from "ofetch";
+import type { Fetch, FetchHooks, ResponseType } from "ofetch";
 
 /** Helper type to unwrap potential arrays. */
 type InnerArray<T> = T extends (infer U)[] ? U : T;
 
 /** Definition of an interceptor for the `FetchService`. */
 export type FetchInterceptor =
-  AbstractFetchInterceptor | (InterceptorHooks & { urlPattern?: RegExp });
+  | AbstractFetchInterceptor
+  | (InterceptorHooks & {
+      urlPattern?: RegExp;
+      onFetch?: InterceptorFetchHook;
+    });
 
 /**
  * An object which defines several interceptor hooks.
@@ -19,6 +23,20 @@ export type InterceptorHookArgs<
   K extends keyof InterceptorHooks,
   R extends ResponseType = ResponseType,
 > = Parameters<Required<InterceptorHooks<R>>[K]>[0];
+
+/** Context passed to transport-level interceptor middleware. */
+export interface InterceptorFetchContext {
+  request: Parameters<Fetch>[0];
+  options: RequestInit;
+  next(
+    request?: Parameters<Fetch>[0],
+    options?: RequestInit,
+  ): Promise<Response>;
+}
+
+export type InterceptorFetchHook = (
+  context: InterceptorFetchContext,
+) => Promise<Response>;
 
 /**
  * An abstract class which defines the FetchInterceptor hooks
@@ -45,4 +63,5 @@ export abstract class AbstractFetchInterceptor {
   onResponseError?(
     context: InterceptorHookArgs<"onResponseError">,
   ): void | Promise<void>;
+  onFetch?(context: InterceptorFetchContext): Promise<Response>;
 }
