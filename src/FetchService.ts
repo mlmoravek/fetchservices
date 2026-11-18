@@ -131,9 +131,9 @@ export class FetchService {
     headers: Record<string, any> = {},
   ): Promise<T> {
     const config: FetchOptions<"json"> = {
-      headers,
-      params,
       method: "GET",
+      headers,
+      query: params,
     };
     return this.fetch<T>(url, config);
   }
@@ -153,10 +153,10 @@ export class FetchService {
     headers: Record<string, any> = {},
   ): Promise<T> {
     const config: FetchOptions<"json"> = {
-      headers,
-      params,
-      body,
       method: "POST",
+      headers,
+      query: params,
+      body,
     };
     return this.fetch<T>(url, config);
   }
@@ -176,10 +176,10 @@ export class FetchService {
     headers: Record<string, any> = {},
   ): Promise<T> {
     const config: FetchOptions<"json"> = {
-      headers,
-      params,
-      body,
       method: "PUT",
+      headers,
+      query: params,
+      body,
     };
     return this.fetch<T>(url, config);
   }
@@ -199,10 +199,10 @@ export class FetchService {
     body: Record<string, any> | string = {},
   ): Promise<T> {
     const config: FetchOptions<"json"> = {
-      params,
+      method: "DELETE",
+      query: params,
       headers,
       body,
-      method: "DELETE",
     };
     return this.fetch<T>(url, config);
   }
@@ -222,13 +222,13 @@ export class FetchService {
     headers: Record<string, any> = {},
   ): Promise<T> {
     const config: FetchOptions<"json"> = {
+      method: "POST",
       headers: Object.assign(
         { "Content-Type": "multipart/form-data" },
         headers,
       ),
-      params,
+      query: params,
       body: data,
-      method: "POST",
     };
     return this.fetch<T>(url, config);
   }
@@ -246,10 +246,10 @@ export class FetchService {
     headers: Record<string, any> = {},
   ): Promise<ArrayBuffer> {
     const config: FetchOptions<"arrayBuffer"> = {
-      headers,
-      params,
-      responseType: "arrayBuffer",
       method: "GET",
+      headers,
+      query: params,
+      responseType: "arrayBuffer",
     };
     return this.fetch<ArrayBuffer, "arrayBuffer">(url, config);
   }
@@ -269,14 +269,14 @@ export class FetchService {
     headers: Record<string, any> = {},
   ): Promise<ArrayBuffer> {
     const config: FetchOptions<"arrayBuffer"> = {
+      method: "POST",
       headers: {
         "Content-Disposition": "attachment;",
         ...headers,
       },
-      params,
+      query: params,
       body,
       responseType: "arrayBuffer",
-      method: "POST",
     };
     return this.fetch<ArrayBuffer, "arrayBuffer">(url, config);
   }
