@@ -5,8 +5,7 @@ type InnerArray<T> = T extends (infer U)[] ? U : T;
 
 /** Definition of an interceptor for the `FetchService`. */
 export type FetchInterceptor =
-  | AbstractFetchInterceptor
-  | (InterceptorHooks & { urlPattern?: RegExp });
+  AbstractFetchInterceptor | (InterceptorHooks & { urlPattern?: RegExp });
 
 /**
  * An object which defines several interceptor hooks.
@@ -38,8 +37,12 @@ export abstract class AbstractFetchInterceptor {
       typeof urlPattern === "string" ? new RegExp(urlPattern) : urlPattern;
   }
 
-  onRequest?(context: InterceptorHookArgs<"onRequest">): void;
-  onRequestError?(context: InterceptorHookArgs<"onRequestError">): void;
-  onResponse?(context: InterceptorHookArgs<"onResponse">): void;
-  onResponseError?(context: InterceptorHookArgs<"onResponseError">): void;
+  onRequest?(context: InterceptorHookArgs<"onRequest">): void | Promise<void>;
+  onRequestError?(
+    context: InterceptorHookArgs<"onRequestError">,
+  ): void | Promise<void>;
+  onResponse?(context: InterceptorHookArgs<"onResponse">): void | Promise<void>;
+  onResponseError?(
+    context: InterceptorHookArgs<"onResponseError">,
+  ): void | Promise<void>;
 }
