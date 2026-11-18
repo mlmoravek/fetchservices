@@ -1,7 +1,7 @@
 {
   "name": "fetchservices",
   "description": "A wrapper service to make http fetch requests.",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "license": "MIT",
   "private": false,
   "type": "module",
@@ -44,7 +44,8 @@
     "test:lint": "run-s test:eslint test:prettier",
     "test:eslint": "eslint .",
     "test:prettier": "prettier --check .",
-    "changelog": "conventional-changelog -p conventionalcommits -i CHANGELOG.md -s",
+    "gen:changelog": "conventional-changelog -p conventionalcommits -i CHANGELOG.md -s",
+    "release": "npm i && npm run gen:changelog",
     "update": "ncu -u"
   },
   "dependencies": {
