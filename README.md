@@ -73,7 +73,7 @@ Send a `DELETE` request.
 
 **`api.upload<T>(url, data, params?, headers?)`**
 
-Send a multipart file upload request.
+Send a multipart file upload request. The multipart `Content-Type` is set automatically; you must not set it in `headers`, the fetch implementation will add the required boundary.
 
 **`api.download(url, params?, headers?)`**
 

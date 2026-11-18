@@ -223,10 +223,7 @@ export class FetchService {
   ): Promise<T> {
     const config: FetchOptions<"json"> = {
       method: "POST",
-      headers: Object.assign(
-        { "Content-Type": "multipart/form-data" },
-        headers,
-      ),
+      headers,
       query: params,
       body: data,
     };
