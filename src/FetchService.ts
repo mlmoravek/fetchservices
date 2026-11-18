@@ -222,10 +222,7 @@ export class FetchService {
     headers: Record<string, any> = {},
   ): Promise<T> {
     const config: FetchOptions<"json"> = {
-      headers: Object.assign(
-        { "Content-Type": "multipart/form-data" },
-        headers,
-      ),
+      headers,
       params,
       body: data,
       method: "POST",
