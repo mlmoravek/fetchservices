@@ -272,6 +272,7 @@ The package also exports controller base classes for structured request handling
 ### `BaseController`
 
 Extend the abstract `BaseController` class to create a structured class for api requests.
+Call `dispose()` when a controller is no longer needed to unregister the interceptors it added.
 
 ```ts
 import FetchService from "fetchservices";
