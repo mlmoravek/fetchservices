@@ -1,7 +1,5 @@
 import eslint from "@eslint/js";
-import { defineConfig, globalIgnores } from "eslint/config";
-import { includeIgnoreFile } from "@eslint/compat";
-import pluginUnicorn from "eslint-plugin-unicorn";
+import { defineConfig, globalIgnores, includeIgnoreFile } from "eslint/config";
 import pluginJsdoc from "eslint-plugin-jsdoc";
 import eslintConfigPrettier from "eslint-config-prettier/flat";
 import tslint from "typescript-eslint";
@@ -40,9 +38,6 @@ export default defineConfig(
     },
   },
 
-  // add unicon configs
-  pluginUnicorn.configs.recommended,
-
   // add jsdoc configs
   pluginJsdoc.configs["flat/recommended-typescript-error"],
   pluginJsdoc.configs["flat/logical-typescript-error"],
@@ -65,11 +60,6 @@ export default defineConfig(
       "@typescript-eslint/unbound-method": "off",
       // JSDoc
       "jsdoc/require-hyphen-before-param-description": ["error", "always"],
-      // Unicorn
-      "unicorn/filename-case": "off",
-      "unicorn/no-array-for-each": "off",
-      "unicorn/no-array-reduce": "off",
-      "unicorn/prevent-abbreviations": "off",
     },
   },
 );

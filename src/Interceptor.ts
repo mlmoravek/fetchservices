@@ -5,8 +5,7 @@ type InnerArray<T> = T extends (infer U)[] ? U : T;
 
 /** Definition of an interceptor for the `FetchService`. */
 export type FetchInterceptor =
-  | AbstractFetchInterceptor
-  | (InterceptorHooks & { urlPattern?: RegExp });
+  AbstractFetchInterceptor | (InterceptorHooks & { urlPattern?: RegExp });
 
 /**
  * An object which defines several interceptor hooks.
