@@ -1,3 +1,13 @@
+## [0.2.5](https://github.com/mlmoravek/fetchservices/compare/v0.2.4...v0.2.5) (2026-11-18)
+
+### Bug Fixes
+
+* await asynchronous request interceptors ([592b311](https://github.com/mlmoravek/fetchservices/commit/592b3113ea1bc2c41503ab1d06758cf859cdb845))
+* correctly use params as query parameter ([321fe7f](https://github.com/mlmoravek/fetchservices/commit/321fe7f85b7dad343078bbf5b3b1f811436193d7))
+* manage controller interceptor lifecycle ([1cadc7f](https://github.com/mlmoravek/fetchservices/commit/1cadc7f299431f78949e6003e218853d85701663))
+* preserve multipart upload boundaries ([ae98e82](https://github.com/mlmoravek/fetchservices/commit/ae98e82ebbe5f7cd65fee13fb49c3b898b199ea0))
+
+
 ## [0.2.4](https://github.com/mlmoravek/fetchservices/compare/v0.2.3...v0.2.4) (2026-05-21)
 
 ### Bug Fixes
