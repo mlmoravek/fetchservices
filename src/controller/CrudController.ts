@@ -29,7 +29,7 @@ export class CrudController<
    */
   public create(entity: Entity): Promise<Entity> {
     return this.api
-      .post<DTO>(this.path, this.onRequest(entity))
+      .post<DTO>(this.path, { body: this.onRequest(entity) })
       .then(this.onResponse);
   }
 
@@ -50,7 +50,7 @@ export class CrudController<
    */
   public update(id: number | string, entity: Entity): Promise<Entity> {
     return this.api
-      .put<DTO>(`${this.path}/${id}`, this.onRequest(entity))
+      .put<DTO>(`${this.path}/${id}`, { body: this.onRequest(entity) })
       .then(this.onResponse);
   }
 

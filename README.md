@@ -41,7 +41,7 @@ const users = await api.get<{ id: number; name: string }[]>("/users");
 
 // POST request
 const created = await api.post<{ id: number; name: string }>("/users", {
-  name: "Alice",
+  body: { name: "Alice" },
 });
 ```
 
@@ -55,33 +55,56 @@ Create a new HTTP service instance. Pass any valid `ofetch` request options.
 const api = new FetchService({ baseURL: "https://api.example.com" });
 ```
 
-**`api.get<T>(url, params?, headers?)`**
+**`api.get<T>(url, options?)`**
 
-Send a `GET` request.
+Send a `GET` request. Options use the `ofetch` request options shape, excluding `method`.
 
-**`api.post<T>(url, body?, params?, headers?)`**
+**`api.post<T>(url, options?)`**
 
 Send a `POST` request.
 
-**`api.put<T>(url, body?, params?, headers?)`**
+**`api.put<T>(url, options?)`**
 
 Send a `PUT` request.
 
-**`api.delete<T>(url, params?, headers?, body?)`**
+**`api.delete<T>(url, options?)`**
 
 Send a `DELETE` request.
 
-**`api.upload<T>(url, data, params?, headers?)`**
+**`api.upload<T>(url, options)`**
 
-Send a multipart file upload request. The multipart `Content-Type` is set automatically; you must not set it in `headers`, the fetch implementation will add the required boundary.
+Send a multipart file upload request. `options.body` must be a `FormData` instance. The multipart `Content-Type` is set automatically; do not set it in `headers`, so the fetch implementation can add the required boundary.
 
-**`api.download(url, params?, headers?)`**
+**`api.download(url, options?)`**
 
-Download a binary payload and return an `ArrayBuffer`.
+Download a binary payload and return an `ArrayBuffer`. The response type is fixed to `arrayBuffer`.
+
+**`api.postDownload(url, options?)`**
+
+Send a `POST` request and return the binary payload as an `ArrayBuffer`.
 
 **`api.fetch<T>(request, options?)`**
 
 Make a low-level request with a raw `fetch`-style request or options.
+
+For example, query parameters, headers, request bodies, cancellation, and response types are passed in one options object:
+
+```ts
+const users = await api.get<User[]>("/users", {
+  query: { active: true },
+  headers: { "X-Request-Source": "dashboard" },
+  signal: abortController.signal,
+});
+
+const created = await api.post<User>("/users", {
+  body: { name: "Alice" },
+  query: { notify: true },
+});
+
+const text = await api.get("/status", { responseType: "text" });
+```
+
+The convenience methods set their HTTP method; it cannot be overridden through `options`. For methods other than `download` and `postDownload`, `responseType` controls the returned type. When omitted, the response type is `unknown` unless a JSON response type is supplied as a type argument.
 
 ### Singleton
 
@@ -328,6 +351,7 @@ class MyController extends CrudController<MyEntity> {
 ## Exported modules
 
 - `FetchService` – default HTTP client wrapper
+- `FetchServiceRequestOptions` – typed `ofetch` options accepted by convenience methods
 - `FetchInterceptor` / `AbstractFetchInterceptor` – interceptor types and base class
 - `LoggingInterceptor` – logs requests and responses
 - `AbortInterceptor` – adds abort support via `AbortController`

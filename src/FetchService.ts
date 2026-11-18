@@ -17,6 +17,12 @@ type FetchServiceOptions = Omit<
   "onRequest" | "onRequestError" | "onResponse" | "onResponseError"
 >;
 
+/** Request options accepted by the convenience methods. The HTTP method is fixed by each helper. */
+export type RequestOptions<R extends ResponseType = ResponseType> = Omit<
+  FetchOptions<R>,
+  "method"
+>;
+
 /**
  * A lightweight HTTP client fetch service built on [`ofetch`](https://github.com/unjs/ofetch/).
  *
@@ -121,131 +127,101 @@ export class FetchService {
   /**
    * Makes a GET request.
    * @param url - The server URL that will be used for the request.
-   * @param params - The URL parameters to be sent with the request.
-   * @param headers - Custom headers to be sent.
-   * @returns `Promise<T>`
+   * @param options - Request options such as query parameters, headers, and cancellation signal.
+   * @returns A promise for the parsed response.
    */
-  public get<T>(
+  public get<T = unknown, R extends ResponseType = "json">(
     url: string,
-    params: Record<string, any> = {},
-    headers: Record<string, any> = {},
-  ): Promise<T> {
-    const config: FetchOptions<"json"> = {
+    options: RequestOptions<R> = {},
+  ): Promise<MappedResponseType<R, T>> {
+    const config: FetchOptions<R> = {
+      ...options,
       method: "GET",
-      headers,
-      query: params,
     };
-    return this.fetch<T>(url, config);
+    return this.fetch<T, R>(url, config);
   }
 
   /**
    * Makes a POST request.
    * @param url - The server URL that will be used for the request.
-   * @param body - The data to be sent as the request in the body.
-   * @param params - The URL parameters to be sent with the request.
-   * @param headers - Custom headers to be sent.
-   * @returns `Promise<T>`
+   * @param options - Request options, including the optional request body.
+   * @returns A promise for the parsed response.
    */
-  public post<T>(
+  public post<T = unknown, R extends ResponseType = "json">(
     url: string,
-    body: Record<string, any> | string = {},
-    params: Record<string, any> = {},
-    headers: Record<string, any> = {},
-  ): Promise<T> {
-    const config: FetchOptions<"json"> = {
+    options: RequestOptions<R> = {},
+  ): Promise<MappedResponseType<R, T>> {
+    const config: FetchOptions<R> = {
+      ...options,
       method: "POST",
-      headers,
-      query: params,
-      body,
     };
-    return this.fetch<T>(url, config);
+    return this.fetch<T, R>(url, config);
   }
 
   /**
    * Makes a PUT request.
    * @param url - The server URL that will be used for the request.
-   * @param body - The data to be sent as the request in the body.
-   * @param params - The URL parameters to be sent with the request.
-   * @param headers - Custom headers to be sent.
-   * @returns `Promise<T>`
+   * @param options - Request options, including the optional request body.
+   * @returns A promise for the parsed response.
    */
-  public put<T>(
+  public put<T = unknown, R extends ResponseType = "json">(
     url: string,
-    body: Record<string, any> | string = {},
-    params: Record<string, any> = {},
-    headers: Record<string, any> = {},
-  ): Promise<T> {
-    const config: FetchOptions<"json"> = {
+    options: RequestOptions<R> = {},
+  ): Promise<MappedResponseType<R, T>> {
+    const config: FetchOptions<R> = {
+      ...options,
       method: "PUT",
-      headers,
-      query: params,
-      body,
     };
-    return this.fetch<T>(url, config);
+    return this.fetch<T, R>(url, config);
   }
 
   /**
    * Makes a DELETE request.
    * @param url - The server URL that will be used for the request.
-   * @param params - The URL parameters to be sent with the request.
-   * @param headers - Custom headers to be sent.
-   * @param body - The data to be sent as the request in the body.
-   * @returns `Promise<T>`
+   * @param options - Request options, including an optional request body.
+   * @returns A promise for the parsed response.
    */
-  public delete<T>(
+  public delete<T = unknown, R extends ResponseType = "json">(
     url: string,
-    params: Record<string, any> = {},
-    headers: Record<string, any> = {},
-    body: Record<string, any> | string = {},
-  ): Promise<T> {
-    const config: FetchOptions<"json"> = {
+    options: RequestOptions<R> = {},
+  ): Promise<MappedResponseType<R, T>> {
+    const config: FetchOptions<R> = {
+      ...options,
       method: "DELETE",
-      query: params,
-      headers,
-      body,
     };
-    return this.fetch<T>(url, config);
+    return this.fetch<T, R>(url, config);
   }
 
   /**
    * Makes a POST request to upload a multipart file.
    * @param url - The server URL that will be used for the request.
-   * @param data - The data to be sent as the request in the body.
-   * @param params - The URL parameters to be sent with the request.
-   * @param headers - Custom headers to be sent.
-   * @returns `Promise<T>`
+   * @param options - Request options with a FormData request body.
+   * @returns A promise for the parsed response.
    */
-  public upload<T>(
+  public upload<T = unknown, R extends ResponseType = "json">(
     url: string,
-    data: FormData,
-    params: Record<string, any> = {},
-    headers: Record<string, any> = {},
-  ): Promise<T> {
-    const config: FetchOptions<"json"> = {
+    options: RequestOptions<R> & { body: FormData },
+  ): Promise<MappedResponseType<R, T>> {
+    const config: FetchOptions<R> = {
+      ...options,
       method: "POST",
-      headers,
-      query: params,
-      body: data,
     };
-    return this.fetch<T>(url, config);
+    return this.fetch<T, R>(url, config);
   }
 
   /**
    * Makes a GET request to download a binary payload and return an ArrayBuffer.
    * @param url - The server URL that will be used for the request.
-   * @param params - The URL parameters to be sent with the request.
-   * @param headers - Custom headers to be sent.
-   * @returns `Promise<ArrayBuffer>`
+   * @param options - Request options except responseType, which is fixed to arrayBuffer.
+   * @returns A promise for the response as an ArrayBuffer.
    */
   public download(
     url: string,
-    params: Record<string, any> = {},
-    headers: Record<string, any> = {},
+    options: Omit<RequestOptions<"arrayBuffer">, "responseType"> = {},
   ): Promise<ArrayBuffer> {
     const config: FetchOptions<"arrayBuffer"> = {
+      ...options,
       method: "GET",
-      headers,
-      query: params,
       responseType: "arrayBuffer",
     };
     return this.fetch<ArrayBuffer, "arrayBuffer">(url, config);
@@ -254,25 +230,21 @@ export class FetchService {
   /**
    * Makes a POST request to download a binary payload and return an ArrayBuffer.
    * @param url - The server URL that will be used for the request.
-   * @param body - The data to be sent as the request in the body.
-   * @param params - The URL parameters to be sent with the request.
-   * @param headers - Custom headers to be sent.
-   * @returns `Promise<ArrayBuffer>`
+   * @param options - Request options except responseType, which is fixed to arrayBuffer.
+   * @returns A promise for the response as an ArrayBuffer.
    */
   public postDownload(
     url: string,
-    body: Record<string, any> | string = {},
-    params: Record<string, any> = {},
-    headers: Record<string, any> = {},
+    options: Omit<RequestOptions<"arrayBuffer">, "responseType"> = {},
   ): Promise<ArrayBuffer> {
+    const headers = new Headers({ "Content-Disposition": "attachment;" });
+    new Headers(options.headers).forEach((value, key) => {
+      headers.set(key, value);
+    });
     const config: FetchOptions<"arrayBuffer"> = {
+      ...options,
       method: "POST",
-      headers: {
-        "Content-Disposition": "attachment;",
-        ...headers,
-      },
-      query: params,
-      body,
+      headers,
       responseType: "arrayBuffer",
     };
     return this.fetch<ArrayBuffer, "arrayBuffer">(url, config);
