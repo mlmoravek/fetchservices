@@ -20,7 +20,7 @@ export abstract class AuthService {
    * @returns A `AuthService` instance or `undefined` if none is created yet.
    */
   public static getInstance(): AuthService | undefined {
-    return AuthService.instance;
+    return this.instance;
   }
 
   constructor(api: FetchService = new FetchService()) {

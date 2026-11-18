@@ -36,7 +36,7 @@ export class FetchService {
    * @returns A `FetchService` instance or `undefined` if none is created yet.
    */
   public static getInstance(): FetchService | undefined {
-    return FetchService.instance;
+    return this.instance;
   }
 
   /**

@@ -63,7 +63,6 @@
     "eslint": "10.15.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-jsdoc": "65.4.11",
-    "eslint-plugin-unicorn": "80.0.0",
     "globals": "17.14.0",
     "npm-check-updates": "23.1.1",
     "npm-run-all2": "9.0.4",
