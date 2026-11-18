@@ -112,6 +112,7 @@ import {
   AbortInterceptor,
   BearerTokenInterceptor,
   ETagCacheInterceptor,
+  InFlightDeduplicationInterceptor,
 } from "fetchservices/interceptors";
 
 // initialise a new FetchService
@@ -125,6 +126,7 @@ const authId = api.addInterceptor(
 );
 const cacheInterceptor = new ETagCacheInterceptor(".*\/users\/.*");
 api.addInterceptor(cacheInterceptor);
+api.addInterceptor(new InFlightDeduplicationInterceptor());
 
 // you can remove any interceptor later on
 api.removeInterceptor(loggerId);
@@ -150,6 +152,25 @@ class CustomInterceptor extends AbstractFetchInterceptor {
 
 // add the interceptor to the FetchService instance
 api.addInterceptor(new CustomInterceptor(".*\/api/path\/.*"));
+```
+
+### In-flight GET request deduplication
+
+`InFlightDeduplicationInterceptor` is opt-in. It shares a network request only for
+matching in-flight GET requests, including their URL, headers, and fetch options.
+It does not cache completed responses. Cancelling one caller rejects only that
+caller's wait; the shared request is aborted when every caller has cancelled.
+Requests made with a `Request` object, non-GET methods, or a request body are not
+deduplicated.
+
+```ts
+import { InFlightDeduplicationInterceptor } from "fetchservices/interceptors";
+
+api.addInterceptor(new InFlightDeduplicationInterceptor());
+
+// These share one network request if they overlap and have matching options.
+const first = api.get("/users");
+const second = api.get("/users");
 ```
 
 ```ts

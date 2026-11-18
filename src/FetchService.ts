@@ -1,16 +1,17 @@
 import {
   ofetch,
   type $Fetch,
+  type Fetch,
   type FetchOptions,
   type FetchRequest,
   type MappedResponseType,
   type ResponseType,
 } from "ofetch";
-import {
+import type {
   InterceptorHookArgs,
   FetchInterceptor,
   InterceptorHooks,
-} from "@/index";
+} from "./Interceptor";
 
 type FetchServiceOptions = Omit<
   FetchOptions,
@@ -45,25 +46,32 @@ export class FetchService {
    */
   constructor(options: FetchServiceOptions = {}) {
     // create ofetch api instance
-    this.api = ofetch.create({
-      ...options,
-      // onRequest is called as soon as ofetch is called, allowing you to modify options or do simple logging.
-      onRequest: async (context): Promise<void> => {
-        await this.callInterceptors("onRequest", context);
+    this.api = ofetch.create(
+      {
+        ...options,
+        // onRequest is called as soon as ofetch is called, allowing you to modify options or do simple logging.
+        onRequest: async (context): Promise<void> => {
+          await this.callInterceptors("onRequest", context);
+        },
+        // onRequestError will be called when the fetch request fails.
+        onRequestError: async (context): Promise<void> => {
+          await this.callInterceptors("onRequestError", context);
+        },
+        // onResponse will be called after fetch call and parsing body.
+        onResponse: async (context): Promise<void> => {
+          await this.callInterceptors("onResponse", context);
+        },
+        // onResponseError is the same as onResponse but will be called when fetch happens but response.ok is not true.
+        onResponseError: async (context): Promise<void> => {
+          await this.callInterceptors("onResponseError", context);
+        },
       },
-      // onRequestError will be called when the fetch request fails.
-      onRequestError: async (context): Promise<void> => {
-        await this.callInterceptors("onRequestError", context);
+      {
+        // fetch is called as middleware handler
+        fetch: (request, options) =>
+          this.callFetchInterceptors(request, options ?? {}, ofetch.native),
       },
-      // onResponse will be called after fetch call and parsing body.
-      onResponse: async (context): Promise<void> => {
-        await this.callInterceptors("onResponse", context);
-      },
-      // onResponseError is the same as onResponse but will be called when fetch happens but response.ok is not true.
-      onResponseError: async (context): Promise<void> => {
-        await this.callInterceptors("onResponseError", context);
-      },
-    });
+    );
 
     // set static singleton instance
     FetchService.instance = this;
@@ -299,6 +307,49 @@ export class FetchService {
       }
     }
   }
+
+  /**
+   * Runs transport middleware before making the underlying fetch request.
+   * @param request - The resolved request URL or Request object.
+   * @param options - The resolved fetch options.
+   * @param fetcher - The underlying fetch implementation.
+   * @returns The fetch response.
+   */
+  private callFetchInterceptors(
+    request: Parameters<Fetch>[0],
+    options: RequestInit,
+    fetcher: Fetch,
+  ): Promise<Response> {
+    const interceptors = Array.from(this.interceptors.values());
+
+    const dispatch = (
+      index: number,
+      currentRequest: Parameters<Fetch>[0],
+      currentOptions: RequestInit,
+    ): Promise<Response> => {
+      const interceptor = interceptors[index];
+      if (!interceptor) {
+        return fetcher(currentRequest, currentOptions);
+      }
+
+      const handler = interceptor.onFetch;
+      if (
+        typeof handler !== "function" ||
+        !matchesRegex(currentRequest, interceptor.urlPattern)
+      ) {
+        return dispatch(index + 1, currentRequest, currentOptions);
+      }
+
+      return handler.call(interceptor, {
+        request: currentRequest,
+        options: currentOptions,
+        next: (nextRequest = currentRequest, nextOptions = currentOptions) =>
+          dispatch(index + 1, nextRequest, nextOptions),
+      });
+    };
+
+    return dispatch(0, request, options);
+  }
 }
 
 /**
@@ -307,13 +358,18 @@ export class FetchService {
  * @param regex - The regular expression for testing
  * @returns `true`, if there is a match.
  */
-function matchesRegex(request: FetchRequest, regex?: RegExp): boolean {
+function matchesRegex(request: unknown, regex?: RegExp): boolean {
   if (!regex) return true;
 
-  const url: string =
-    typeof request === "object" && request.url
-      ? request.url
-      : (request as string);
+  if (typeof request === "string") return regex.test(request);
 
-  return regex.test(url);
+  if (typeof request === "object" && request !== null) {
+    if ("url" in request && typeof request.url === "string") {
+      return regex.test(request.url);
+    }
+
+    if (request instanceof URL) return regex.test(request.href);
+  }
+
+  return false;
 }
