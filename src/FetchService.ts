@@ -48,20 +48,20 @@ export class FetchService {
     this.api = ofetch.create({
       ...options,
       // onRequest is called as soon as ofetch is called, allowing you to modify options or do simple logging.
-      onRequest: (args): void => {
-        this.callInterceptors("onRequest", args);
+      onRequest: async (context): Promise<void> => {
+        await this.callInterceptors("onRequest", context);
       },
       // onRequestError will be called when the fetch request fails.
-      onRequestError: (args): void => {
-        this.callInterceptors("onRequestError", args);
+      onRequestError: async (context): Promise<void> => {
+        await this.callInterceptors("onRequestError", context);
       },
       // onResponse will be called after fetch call and parsing body.
-      onResponse: (args): void => {
-        this.callInterceptors("onResponse", args);
+      onResponse: async (context): Promise<void> => {
+        await this.callInterceptors("onResponse", context);
       },
       // onResponseError is the same as onResponse but will be called when fetch happens but response.ok is not true.
-      onResponseError: (args): void => {
-        this.callInterceptors("onResponseError", args);
+      onResponseError: async (context): Promise<void> => {
+        await this.callInterceptors("onResponseError", context);
       },
     });
 
@@ -283,21 +283,21 @@ export class FetchService {
    * @param key - The hook key.
    * @param options - The hook options.
    */
-  private callInterceptors<
+  private async callInterceptors<
     K extends keyof InterceptorHooks,
     R extends ResponseType,
-  >(key: K, options: InterceptorHookArgs<K, R>): void {
-    this.interceptors.forEach((interceptor) => {
+  >(key: K, options: InterceptorHookArgs<K, R>): Promise<void> {
+    for (const interceptor of this.interceptors.values()) {
       const handler = interceptor[key];
       if (
         typeof handler === "function" &&
         // check if interceptor matches request URL
         matchesRegex(options.request, interceptor.urlPattern)
       ) {
-        // @ts-expect-error idk whats going on here
-        handler.bind(interceptor)(options);
+        // @ts-expect-error Hook key and context argument types are correlated.
+        await handler.bind(interceptor)(options);
       }
-    });
+    }
   }
 }
 

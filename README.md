@@ -101,7 +101,7 @@ const api = FetchService.getInstance();
 The `FetchService` supports request and response interceptors. You can add your own or use the built-in interceptors.
 
 An interceptor can be added with `api.addInterceptor(interceptor)`.  
-Interceptor keys are strings and can be used to remove registered interceptors with `removeInterceptor(key)`.
+Interceptor keys are strings and can be used to remove registered interceptors with `removeInterceptor(key)`. Hooks may be asynchronous; each request waits for matching interceptor hooks to finish before continuing.
 
 ### Built-in interceptors
 
@@ -245,6 +245,7 @@ const auth = AuthService.getInstance();
 The `KeyCloakAuthService` implements the abstract `AuthService` for a [Keycloak](https://www.keycloak.org/) provider and requires [`keycloak-js`](https://github.com/keycloak/keycloak-js) as an additional dependency.
 
 > Note: [`keycloak-js`](https://github.com/keycloak/keycloak-js) is an optional dependency. You need to install it only when you want to use this service.
+> Token refresh failures reject the request that triggered the refresh.
 
 ```ts
 import FetchService from "fetchservices";

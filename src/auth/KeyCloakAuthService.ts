@@ -39,16 +39,21 @@ export class KeyCloakAuthService extends AuthService {
     // which is called when the access token has expired
     // the token will get silently refreshed, resulting in a seamless user experience after login
     this.keycloak.onTokenExpired = (): void => {
-      this.refreshToken(options.minValidity);
+      void this.refreshToken(options.minValidity).catch((error: unknown) => {
+        console.error(
+          "Failed to refresh the KeyCloak token, or the session has expired.",
+          error,
+        );
+      });
     };
-
-    // set Authorization Bearer token header
-    this.addAuthorizationHeader(() => this.getToken());
 
     // adds a request interceptor that refreshes the token every time a request is made
     this.tokenInterceptorId = api.addInterceptor({
       onRequest: () => this.refreshToken(options.minValidity),
     });
+
+    // set Authorization Bearer token header after refreshing the token
+    this.addAuthorizationHeader(() => this.getToken());
   }
 
   /**
@@ -169,20 +174,11 @@ export class KeyCloakAuthService extends AuthService {
    * @param minValidity - If the token expires within `minValidity` seconds, the token is refreshed.
    * @returns `Promise<void>`
    */
-  public refreshToken(minValidity = 30): Promise<void> {
-    return this.keycloak
-      .updateToken(minValidity) // If the token expires within `minValidity` seconds, the token is refreshed.
-      .then((refreshed: boolean) => {
-        if (refreshed && typeof this.tokenRefreshHandler === "function") {
-          // call specific tokenRefreshHandler if set
-          this.tokenRefreshHandler(this.getToken());
-        }
-      })
-      .catch((error: unknown) => {
-        console.error(
-          "Failed to refresh the KeyCloak token, or the session has expired.",
-          error,
-        );
-      });
+  public async refreshToken(minValidity = 30): Promise<void> {
+    const isRefreshed = await this.keycloak.updateToken(minValidity);
+    if (isRefreshed && typeof this.tokenRefreshHandler === "function") {
+      // call specific tokenRefreshHandler if set
+      this.tokenRefreshHandler(this.getToken());
+    }
   }
 }
