@@ -4,9 +4,11 @@ import {
   ETagCacheInterceptor,
   LoggingInterceptor,
 } from "@/interceptors";
+import type { FetchInterceptor } from "@/index";
 
 export abstract class BaseController {
   protected readonly api: FetchService;
+  private readonly interceptorIds = new Set<string>();
 
   constructor(api: FetchService) {
     this.api = api;
@@ -26,9 +28,9 @@ export abstract class BaseController {
    * @returns The created `ETagCacheInterceptor` instance.
    */
   public enableCache(root: string): ETagCacheInterceptor {
-    const interceptor = new ETagCacheInterceptor(`.*${root}/.*`);
-    this.api.addInterceptor(interceptor);
-    return interceptor;
+    return this.registerInterceptor(
+      new ETagCacheInterceptor(createRootUrlPattern(root)),
+    );
   }
 
   /**
@@ -37,9 +39,9 @@ export abstract class BaseController {
    * @returns The created `AbortInterceptor` instance.
    */
   public enableAbortController(root: string): AbortInterceptor {
-    const interceptor = new AbortInterceptor(`.*${root}/.*`);
-    this.api.addInterceptor(interceptor);
-    return interceptor;
+    return this.registerInterceptor(
+      new AbortInterceptor(createRootUrlPattern(root)),
+    );
   }
 
   /**
@@ -48,8 +50,33 @@ export abstract class BaseController {
    * @returns The created `LoggingInterceptor` instance.
    */
   public enableLogging(root: string): LoggingInterceptor {
-    const interceptor = new LoggingInterceptor(`.*${root}/.*`);
-    this.api.addInterceptor(interceptor);
+    return this.registerInterceptor(
+      new LoggingInterceptor(createRootUrlPattern(root)),
+    );
+  }
+
+  /**
+   * Removes interceptors registered by this controller.
+   */
+  public dispose(): void {
+    for (const id of this.interceptorIds) {
+      this.api.removeInterceptor(id);
+    }
+    this.interceptorIds.clear();
+  }
+
+  private registerInterceptor<T extends FetchInterceptor>(interceptor: T): T {
+    this.interceptorIds.add(this.api.addInterceptor(interceptor));
     return interceptor;
   }
+}
+
+function createRootUrlPattern(root: string): RegExp {
+  const normalizedRoot = root.replace(/^\/+|\/+$/g, "");
+  if (!normalizedRoot) {
+    throw new TypeError("Interceptor root must not be empty.");
+  }
+
+  const escapedRoot = normalizedRoot.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return new RegExp(`(?:^|/)${escapedRoot}(?:/|\\?|#|$)`);
 }
