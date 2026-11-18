@@ -28,9 +28,8 @@ export abstract class BaseController {
    * @returns The created `ETagCacheInterceptor` instance.
    */
   public enableCache(root: string): ETagCacheInterceptor {
-    return this.registerInterceptor(
-      new ETagCacheInterceptor(createRootUrlPattern(root)),
-    );
+    const interceptor = new ETagCacheInterceptor(createRootUrlPattern(root));
+    return this.registerInterceptor(interceptor);
   }
 
   /**
@@ -39,9 +38,8 @@ export abstract class BaseController {
    * @returns The created `AbortInterceptor` instance.
    */
   public enableAbortController(root: string): AbortInterceptor {
-    return this.registerInterceptor(
-      new AbortInterceptor(createRootUrlPattern(root)),
-    );
+    const interceptor = new AbortInterceptor(createRootUrlPattern(root));
+    return this.registerInterceptor(interceptor);
   }
 
   /**
@@ -50,9 +48,8 @@ export abstract class BaseController {
    * @returns The created `LoggingInterceptor` instance.
    */
   public enableLogging(root: string): LoggingInterceptor {
-    return this.registerInterceptor(
-      new LoggingInterceptor(createRootUrlPattern(root)),
-    );
+    const interceptor = new LoggingInterceptor(createRootUrlPattern(root));
+    return this.registerInterceptor(interceptor);
   }
 
   /**
@@ -71,6 +68,11 @@ export abstract class BaseController {
   }
 }
 
+/**
+ * Converts the root string into a regex expression.
+ * @param root - The root string.
+ * @returns Returns a RegExp based on the root string.
+ */
 function createRootUrlPattern(root: string): RegExp {
   const normalizedRoot = root.replace(/^\/+|\/+$/g, "");
   if (!normalizedRoot) {
